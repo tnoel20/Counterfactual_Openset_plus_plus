@@ -9,3 +9,4 @@ To set up an experiment on split {N} of the {DATASET} dataset, edit the followin
 "hypothesis": "Example run on {DATASET}",
 
 Also, generativeopenset/training.py is currently padding images to work with mnist. Comment out the two padding lines
+43 and 210 of training.py to run this on SVHN or CIFAR-10.
