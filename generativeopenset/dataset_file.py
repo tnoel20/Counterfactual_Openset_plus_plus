@@ -25,7 +25,6 @@ class DatasetFile(object):
         input_filename = os.path.expanduser(input_filename)
         self.data_dir = os.path.dirname(input_filename)
         self.name = os.path.split(input_filename)[-1].replace('.dataset', '')
-
         data = open(input_filename).read()
         if data.startswith(chr(0x1F) + chr(0x8B)):
             print("Decompressing gzip file size {}".format(len(data)))

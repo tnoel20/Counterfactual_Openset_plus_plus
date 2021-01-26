@@ -5,19 +5,15 @@ import random
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-import torchvision.transforms as T
-
 from vector import make_noise
 from dataloader import FlexibleCustomDataloader
 import imutil
 from logutil import TimeSeries
-import losses
 
 from gradient_penalty import calc_gradient_penalty
 
-log = TimeSeries('Training GAN')
 
-#import pdb; pdb.set_trace()
+log = TimeSeries('Training GAN')
 
 
 def train_gan(networks, optimizers, dataloader, epoch=None, **options):
@@ -35,15 +31,9 @@ def train_gan(networks, optimizers, dataloader, epoch=None, **options):
     batch_size = options['batch_size']
     latent_size = options['latent_size']
 
-    loss_class = losses.losses()
-
     for i, (images, class_labels) in enumerate(dataloader):
         images = Variable(images)
-        # For mnist compatibility (remove if not MNIST!!!)
-        images = T.Pad(2).forward(images) 
-        
         labels = Variable(class_labels)
-              
 
         #ac_scale = random.choice([1, 2, 4, 8])
         ac_scale = 4
@@ -135,16 +125,10 @@ def train_gan(networks, optimizers, dataloader, epoch=None, **options):
         netC.zero_grad()
 
         # Classify real examples into the correct K classes with hinge loss
-        #classifier_logits = netC(images)
-        # TODO::Replace This with Matt's loss function::
-        #errC = F.softplus(classifier_logits * -labels).mean()
-        #errC.backward()
-        
         classifier_logits = netC(images)
-        #hopefully labels is not 1hot
-        errC = loss_class.kliep_loss(classifier_logits, labels)
+        # TODO::Replace This with Matt's loss function::
+        errC = F.softplus(classifier_logits * -labels).mean()
         errC.backward()
-
         log.collect('Classifier Loss', errC)
 
         optimizerC.step()
@@ -202,12 +186,8 @@ def train_classifier(networks, optimizers, dataloader, epoch=None, **options):
     print("Using aux_dataset {}".format(dataset_filename))
     aux_dataloader = FlexibleCustomDataloader(dataset_filename, batch_size=batch_size, image_size=image_size)
 
-    loss_class = losses.losses()
-
     for i, (images, class_labels) in enumerate(dataloader):
         images = Variable(images)
-        # FOR MNIST ONLY!!!!!!!! Remove otherwise
-        images = T.Pad(2).forward(images)
         labels = Variable(class_labels)
 
         ############################
@@ -216,34 +196,22 @@ def train_classifier(networks, optimizers, dataloader, epoch=None, **options):
         netC.zero_grad()
 
         # Classify real examples into the correct K classes
-        #classifier_logits = netC(images)
-        #augmented_logits = F.pad(classifier_logits, (0,1))
-        #_, labels_idx = labels.max(dim=1)
-        # TODO:: Replace with Matt's loss function ::
-        #errC = F.nll_loss(F.log_softmax(augmented_logits, dim=1), labels_idx)
-        #errC.backward()
         classifier_logits = netC(images)
+        augmented_logits = F.pad(classifier_logits, (0,1))
         _, labels_idx = labels.max(dim=1)
-        errC = loss_class.kliep_loss(classifier_logits, labels_idx)
-        errC.backward()        
-
+        # TODO:: Replace with Matt's loss function ::
+        errC = F.nll_loss(F.log_softmax(augmented_logits, dim=1), labels_idx)
+        errC.backward()
         log.collect('Classifier Loss', errC)
 
         # Classify aux_dataset examples as open set
         aux_images, aux_labels = aux_dataloader.get_batch()
-        #classifier_logits = netC(Variable(aux_images))
-        #augmented_logits = F.pad(classifier_logits, (0,1))
-        #log_soft_open = F.log_softmax(augmented_logits, dim=1)[:, -1]
-        #errOpenSet = -log_soft_open.mean()
-        #errOpenSet.backward()
         classifier_logits = netC(Variable(aux_images))
         augmented_logits = F.pad(classifier_logits, (0,1))
-        target_label = Variable(torch.LongTensor(classifier_logits.shape[0])).cuda()
-        target_label[:] = classifier_logits.shape[1] #outputs.shape[1]
-        densityratio_loss = loss_class.kliep_loss(augmented_logits, target_label)
-        densityratio_loss.backward()       
- 
-        log.collect('Open Set Loss', densityratio_loss)
+        log_soft_open = F.log_softmax(augmented_logits, dim=1)[:, -1]
+        errOpenSet = -log_soft_open.mean()
+        errOpenSet.backward()
+        log.collect('Open Set Loss', errOpenSet)
 
         optimizerC.step()
         ############################
