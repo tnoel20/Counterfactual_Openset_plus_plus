@@ -1,15 +1,12 @@
-Code for Open Set Learning with Counterfactal Images, ECCV 2018
+Updated code from Open Set Learning with Counterfactal Images, ECCV 2018.
 
-Dataset splits available at:
+start.sh script is set up to run k+1 experiments using the Kliep loss function.
 
-[cifar10](https://lwneal.com/openset-splits/cifar10.tar.gz)
+To set up an experiment on split {N} of the {DATASET} dataset, edit the following lines of params.json as follows
 
-[cifar100](https://lwneal.com/openset-splits/cifar100.tar.gz)
+"dataset": "{DATA_PATH}/{DATASET}-split{N}a.dataset",
+"comparison_dataset": "{DATA_PATH}/{DATASET}-split{N}b.dataset",
+"hypothesis": "Example run on {DATASET}",
 
-[mnist](https://lwneal.com/openset-splits/mnist.tar.gz)
-
-[svhn](https://lwneal.com/openset-splits/svhn.tar.gz)
-
-[tiny_imagenet](https://lwneal.com/openset-splits/tiny_imagenet.tar.gz)
-
-*Check back soon for updates*
+Also, generativeopenset/training.py is currently padding images to work with mnist. Comment out the two padding lines
+43 and 210 of training.py to run this on SVHN or CIFAR-10.
