@@ -5,8 +5,8 @@ set -e
 DATASET_RESULTS_DIR=/nfs/hpc/share/noelt/data/COSD_Data/data/result_data
 
 # Defining Dataset and split
-DATASET=mnist_kl
-SPLIT=3
+DATASET=mnist_kl_fixed
+SPLIT=2
  
 # Creates an archive folder for the dataset
 if [ ! -d $DATASET_RESULTS_DIR/${DATASET}_split_${SPLIT} ]; then
@@ -28,6 +28,9 @@ fi
 if [ ! -d $DATASET_RESULTS_DIR/${DATASET}_split_${SPLIT}/trajectories ]; then
     mkdir $DATASET_RESULTS_DIR/${DATASET}_split_${SPLIT}/trajectories
 fi
+
+#Clear flags
+rm -rf ./*_flag
 
 mv ./checkpoints/* $DATASET_RESULTS_DIR/${DATASET}_split_${SPLIT}/checkpoints/
 mv ./images/* $DATASET_RESULTS_DIR/${DATASET}_split_${SPLIT}/images/

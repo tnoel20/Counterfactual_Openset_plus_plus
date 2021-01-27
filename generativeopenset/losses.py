@@ -20,7 +20,7 @@ class losses:
     def __init__(self, do_softplus=True):
         self.softplus = nn.Softplus() if do_softplus else lambda x: x
    
-    def kliep_loss(self, logits, labels, max_ratio=10): # max ratio 50 by default
+    def kliep_loss(self, logits, labels, max_ratio=50): # max ratio 50 by default
         # We want labels that are NOT one-hot, so we check
         # and correct if this is the case
         if len(labels.shape) == 2:

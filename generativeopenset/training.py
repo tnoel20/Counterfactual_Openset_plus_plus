@@ -39,7 +39,7 @@ def train_gan(networks, optimizers, dataloader, epoch=None, **options):
 
     for i, (images, class_labels) in enumerate(dataloader):
         images = Variable(images)
-        # For mnist compatibility (remove if not MNIST!!!)
+        # Following line For mnist compatibility (remove if not MNIST!!!)
         images = T.Pad(2).forward(images) 
         
         labels = Variable(class_labels)
@@ -206,7 +206,7 @@ def train_classifier(networks, optimizers, dataloader, epoch=None, **options):
 
     for i, (images, class_labels) in enumerate(dataloader):
         images = Variable(images)
-        # FOR MNIST ONLY!!!!!!!! Remove otherwise
+        # Following line FOR MNIST ONLY!!!!!!!! Remove otherwise
         images = T.Pad(2).forward(images)
         labels = Variable(class_labels)
 
