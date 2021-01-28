@@ -23,8 +23,7 @@ class losses:
     def kliep_loss(self, logits, labels, max_ratio=50): # max ratio 50 by default
         # We want labels that are NOT one-hot, so we check
         # and correct if this is the case
-        if len(labels.shape) == 2:
-            labels = torch.argmax(labels, dim=1)
+        #if len(labels.shape) == 2:
         logits = torch.clamp(logits,min=-1*max_ratio, max=max_ratio)
         #preds  = torch.softmax(logits,dim=1)
         preds  = self.softplus(logits)
@@ -61,7 +60,6 @@ class losses:
         loss = (inlier_loss + outlier_loss).mean()#/preds.size(1)
         return loss
     
-
     def power_loss(self, logits, labels, alpha=.1, max_ratio=50):
         logits = torch.clamp(logits,min=-1*max_ratio, max=max_ratio)
         preds  = self.softplus(logits)

@@ -276,6 +276,23 @@ class multiclassDiscriminator32(nn.Module):
         return x
 
 
+class RatioLayer(nn.Module):
+    def __init__(self, in_features, num_classes):
+        super(RatioLayer, self).__init__()
+        self.inlier  = nn.Linear(in_features, num_classes)
+        self.outlier = nn.Linear(in_features, num_classes)
+
+    def forward(self, x, max_ratio=50):
+        eps =  .00000001
+        i = self.inlier(x) 
+        o = self.outlier(x)
+        if self.training:
+            i = torch.clamp(i, min=-max_ratio, max=max_ratio)
+            o = torch.clamp(o, min=-max_ratio, max=max_ratio)
+        logits = torch.sigmoid(i) / (torch.sigmoid(o)+ eps)
+        return logits
+
+
 class classifier32(nn.Module):
     def __init__(self, latent_size=100, num_classes=2, batch_size=64, **kwargs):
         super(self.__class__, self).__init__()
@@ -305,7 +322,7 @@ class classifier32(nn.Module):
         self.bn8 = nn.BatchNorm2d(128)
         self.bn9 = nn.BatchNorm2d(128)
 
-        self.fc1 = nn.Linear(128*4*4, num_classes)
+        self.fc1 = RatioLayer(128*4*4, num_classes) #nn.Linear(128*4*4, num_classes)
         self.dr1 = nn.Dropout2d(0.2)
         self.dr2 = nn.Dropout2d(0.2)
         self.dr3 = nn.Dropout2d(0.2)
@@ -354,3 +371,5 @@ class classifier32(nn.Module):
             return x
         x = self.fc1(x)
         return x
+
+

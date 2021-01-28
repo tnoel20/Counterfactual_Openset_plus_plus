@@ -121,8 +121,10 @@ def get_openset_scores(dataloader, networks, dataloader_train=None, **options):
         openset_scores = openset_kliepmaxornorm(dataloader, networks['classifier_kplusone'], domax=False)
     else:
         #print('Using DEFAULT mode')
-        print('Using KLIEPA1 logit mode')
-        openset_scores = openset_kliepA1_logit(dataloader, networks['classifier_kplusone']) 
+        #print('Using KLIEPA1 logit mode')
+        print('Using POWERLOSS_05 mode')
+        openset_scores = openset_powerloss(dataloader, networks['classifier_kplusone'])
+        #openset_scores = openset_kliepA1_logit(dataloader, networks['classifier_kplusone']) 
         #openset_kplusone(dataloader, networks['classifier_kplusone'])
     return openset_scores
 
@@ -228,9 +230,11 @@ def openset_kliepmaxornorm(dataloader, netC, domax=True):
         images = Variable(images, volatile=True)
         logits = netC(images)
         if domax:
-            openset_scores.extend(torch.max(logits, dim = 1)[0].data.cpu().numpy())
+            # Fixed the sign
+            openset_scores.extend(-torch.max(logits, dim = 1)[0].data.cpu().numpy())
         else:
-            openset_scores.extend(torch.norm(logits, p=1, dim = 1).data.cpu().numpy())
+            # Fixed the sign
+            openset_scores.extend(-torch.norm(logits, p=1, dim = 1).data.cpu().numpy())
     return np.array(openset_scores)
 
 
@@ -247,6 +251,14 @@ def openset_kplusone(dataloader, netC):
         openset_scores.extend(prob_unknown.data.cpu().numpy())
     return np.array(openset_scores)
 
+
+def openset_powerloss(dataloader, netC):
+    openset_scores = []
+    for i, (images, labels) in enumerate(dataloader):
+        images = Variable(images, volatile=True)
+        logits = netC(images)
+        openset_scores.extend(-torch.norm(logits, p=1, dim=1).data.cpu().numpy())
+    return np.array(openset_scores)
 
 
 def openset_kliepA1_logit(dataloader, netC):

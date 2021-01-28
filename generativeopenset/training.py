@@ -40,7 +40,7 @@ def train_gan(networks, optimizers, dataloader, epoch=None, **options):
     for i, (images, class_labels) in enumerate(dataloader):
         images = Variable(images)
         # Following line For mnist compatibility (remove if not MNIST!!!)
-        images = T.Pad(2).forward(images) 
+        #images = T.Pad(2).forward(images) 
         
         labels = Variable(class_labels)
               
@@ -142,7 +142,10 @@ def train_gan(networks, optimizers, dataloader, epoch=None, **options):
         
         classifier_logits = netC(images)
         #hopefully labels is not 1hot
-        errC = loss_class.kliep_loss(classifier_logits, labels)
+        #errC = loss_class.kliep_loss(classifier_logits, labels)
+       
+        # Since labels are 1-hot, labeling them by class number instead 
+        errC = loss_class.power_loss_05(classifier_logits, torch.argmax(labels, dim=1))
         errC.backward()
 
         log.collect('Classifier Loss', errC)
@@ -207,7 +210,7 @@ def train_classifier(networks, optimizers, dataloader, epoch=None, **options):
     for i, (images, class_labels) in enumerate(dataloader):
         images = Variable(images)
         # Following line FOR MNIST ONLY!!!!!!!! Remove otherwise
-        images = T.Pad(2).forward(images)
+        #images = T.Pad(2).forward(images)
         labels = Variable(class_labels)
 
         ############################
@@ -224,7 +227,8 @@ def train_classifier(networks, optimizers, dataloader, epoch=None, **options):
         #errC.backward()
         classifier_logits = netC(images)
         _, labels_idx = labels.max(dim=1)
-        errC = loss_class.kliep_loss(classifier_logits, labels_idx)
+        #errC = loss_class.kliep_loss(classifier_logits, labels_idx)
+        errC = loss_class.power_loss_05(classifier_logits, labels_idx) 
         errC.backward()        
 
         log.collect('Classifier Loss', errC)
@@ -240,7 +244,8 @@ def train_classifier(networks, optimizers, dataloader, epoch=None, **options):
         augmented_logits = F.pad(classifier_logits, (0,1))
         target_label = Variable(torch.LongTensor(classifier_logits.shape[0])).cuda()
         target_label[:] = classifier_logits.shape[1] #outputs.shape[1]
-        densityratio_loss = loss_class.kliep_loss(augmented_logits, target_label)
+        #densityratio_loss = loss_class.kliep_loss(augmented_logits, target_label)
+        densityratio_loss = loss_class.power_loss_05(augmented_logits, target_label)
         densityratio_loss.backward()       
  
         log.collect('Open Set Loss', densityratio_loss)
