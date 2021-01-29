@@ -120,12 +120,8 @@ def get_openset_scores(dataloader, networks, dataloader_train=None, **options):
         # I think this should be classifier_kplusone...
         openset_scores = openset_kliepmaxornorm(dataloader, networks['classifier_kplusone'], domax=False)
     else:
-        #print('Using DEFAULT mode')
-        #print('Using KLIEPA1 logit mode')
-        print('Using POWERLOSS_05 mode')
-        openset_scores = openset_powerloss(dataloader, networks['classifier_kplusone'])
-        #openset_scores = openset_kliepA1_logit(dataloader, networks['classifier_kplusone']) 
-        #openset_kplusone(dataloader, networks['classifier_kplusone'])
+        print('Using DEFAULT mode')
+        openset_kplusone(dataloader, networks['classifier_kplusone'])
     return openset_scores
 
 
@@ -289,7 +285,7 @@ def openset_fuxin(dataloader, netC):
         augmented_logits = F.pad(logits, pad=(0,1))
         # The implicit K+1th class (the open set class) is computed
         #  by assuming an extra linear output with constant value 0
-        preds = augmented_logits #F.softmax(augmented_logits)
+        preds = F.softmax(augmented_logits)
         #preds = augmented_logits
         prob_unknown = preds[:, -1]
         prob_known = preds[:, :-1].max(dim=1)[0]

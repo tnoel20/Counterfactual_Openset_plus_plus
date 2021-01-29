@@ -34,14 +34,14 @@ GENERATOR_MODE=open_set
 #GENERATOR_MODE=ge_et_al
 
 # Train the intial generative model (E+G+D) and the initial classifier (C_K)
-#python3 generativeopenset/train_gan.py --epochs $GAN_EPOCHS --result_dir .
+python3 generativeopenset/train_gan.py --epochs $GAN_EPOCHS --result_dir .
 
-#mkdir initial_gen_model_done_flag
+mkdir initial_gen_model_done_flag
 
 # Baseline: Evaluate the standard classifier (C_k+1)
-#python3 generativeopenset/evaluate_classifier.py --result_dir . --mode baseline
+python3 generativeopenset/evaluate_classifier.py --result_dir . --mode baseline
 
-#mkdir eval_one_done_flag
+mkdir eval_one_done_flag
 
 #python3 generativeopenset/evaluate_classifier.py --result_dir . --mode weibull
 
@@ -68,14 +68,17 @@ python3 generativeopenset/train_classifier.py --epochs $CLASSIFIER_EPOCHS --aux_
 
 mkdir new_classifier_trained_flag
 
+# Evaluate the classifier with fuxin mode (Eq. 6 from paper) (Modified to use raw logits instead of probabilities)
+python3 generativeopenset/evaluate_classifier.py --result_dir . --mode fuxin
+
 # Evaluate the C_K+1 classifier, trained with the augmented data
-#python3 generativeopenset/evaluate_classifier.py --result_dir . --mode kliepmax #fuxin
+python3 generativeopenset/evaluate_classifier.py --result_dir . --mode kliepmax #fuxin
 
-#mkdir classifier_kliepmax_evaluated_flag
+mkdir classifier_kliepmax_evaluated_flag
 
-#python3 generativeopenset/evaluate_classifier.py --result_dir . --mode kliepnorm
+python3 generativeopenset/evaluate_classifier.py --result_dir . --mode kliepnorm
 
-#mkdir classifier_kliepnorm_evaluated_flag
+mkdir classifier_kliepnorm_evaluated_flag
 
 ./print_results.sh
 

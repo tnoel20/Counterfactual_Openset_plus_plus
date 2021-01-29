@@ -120,6 +120,7 @@ def generate_counterfactual_column(networks, start_images, target_class, **optio
         logits = netC(netG(z, gan_scale))
         augmented_logits = F.pad(logits, pad=(0,1))
 
+        # CHANGE
         cf_loss = F.nll_loss(F.log_softmax(augmented_logits, dim=1), target_label)
 
         distance_loss = torch.sum(
