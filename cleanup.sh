@@ -5,7 +5,7 @@ set -e
 DATASET_RESULTS_DIR=/nfs/hpc/share/noelt/data/COSD_Data/data/result_data
 
 # Defining Dataset and split
-DATASET=cifar10_pl
+DATASET=cifar10_pl_fixed
 SPLIT=2
  
 # Creates an archive folder for the dataset

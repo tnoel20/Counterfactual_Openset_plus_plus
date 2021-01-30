@@ -19,8 +19,7 @@ def to_np(z):
     return z.data.cpu().numpy()
 
 
-# Generates 'counterfactual' images for each class, by gradient descent of the
-# class
+# Generates 'counterfactual' images for each class, by gradient descent of the class
 def generate_counterfactual(networks, dataloader, **options):
     """
     # TODO: Fix Dropout/BatchNormalization outside of training
@@ -40,8 +39,7 @@ def generate_counterfactual(networks, dataloader, **options):
 
     batches = [start_images.cpu().numpy()]
     for target_class in range(K + 1):
-        # Generate one column of the visualization, corresponding to a target
-        # class
+        # Generate one column of the visualization, corresponding to a target class
         img_batch = generate_counterfactual_column(networks, start_images, target_class, **options)
         batches.append(img_batch)
 
@@ -96,7 +94,7 @@ def generate_open_set(networks, dataloader, **options):
     imutil.show(images, filename=jpg_filename)
     return images
 
-import losses
+
 log = TimeSeries('Counterfactual')
 def generate_counterfactual_column(networks, start_images, target_class, **options):
     netG = networks['generator']
@@ -107,8 +105,6 @@ def generate_counterfactual_column(networks, start_images, target_class, **optio
     distance_weight = options['cf_distance_weight']
     gan_scale = options['cf_gan_scale']
     cf_batch_size = len(start_images)
-
-    loss_class = losses.losses()
 
     # Start with the latent encodings
     z_value = to_np(netE(start_images, gan_scale))
@@ -125,7 +121,7 @@ def generate_counterfactual_column(networks, start_images, target_class, **optio
         augmented_logits = F.pad(logits, pad=(0,1))
 
         # CHANGE
-        cf_loss = loss_class.power_loss_05(augmented_logits, target_label)
+        cf_loss = F.nll_loss(F.log_softmax(augmented_logits, dim=1), target_label)
 
         distance_loss = torch.sum(
                 (
@@ -137,7 +133,7 @@ def generate_counterfactual_column(networks, start_images, target_class, **optio
 
         total_loss = cf_loss + distance_loss
 
-        scores = augmented_logits
+        scores = F.softmax(augmented_logits, dim=1)
 
         log.collect('Counterfactual loss', cf_loss)
         log.collect('Distance Loss', distance_loss)

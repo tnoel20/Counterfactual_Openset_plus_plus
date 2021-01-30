@@ -17,7 +17,7 @@ from logutil import TimeSeries
 #import pdb; pdb.set_trace()
 
 class losses:
-    def __init__(self, do_softplus=True):
+    def __init__(self, do_softplus=False):
         self.softplus = nn.Softplus() if do_softplus else lambda x: x
    
     def kliep_loss(self, logits, labels, max_ratio=50): # max ratio 50 by default
